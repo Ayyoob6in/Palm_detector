@@ -4,20 +4,29 @@ import 'package:image_picker/image_picker.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 
 class PalmReadingProvider extends ChangeNotifier {
-  final ImagePicker _picker = ImagePicker();
-  XFile? _image;
-  bool _isPalmDetected = false;
   String _detectionResult = '';
-  bool _scanAttempted = false; // New variable to track scan attempts
-
-  XFile? get image => _image;
-  bool get isPalmDetected => _isPalmDetected;
-  String get detectionResult => _detectionResult;
-  bool get scanAttempted => _scanAttempted; // Getter for scan attempt
-
+  XFile? _image;
   // Use ImageLabeler for general object detection
   // ignore: deprecated_member_use
   final ImageLabeler _imageLabeler = GoogleMlKit.vision.imageLabeler();
+
+  bool _isPalmDetected = false;
+  final ImagePicker _picker = ImagePicker();
+  bool _scanAttempted = false; // New variable to track scan attempts
+
+  @override
+  void dispose() {
+    _imageLabeler.close();
+    super.dispose();
+  }
+
+  XFile? get image => _image;
+
+  bool get isPalmDetected => _isPalmDetected;
+
+  String get detectionResult => _detectionResult;
+
+  bool get scanAttempted => _scanAttempted; // Getter for scan attempt
 
   Future<void> chooseFile() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -61,11 +70,5 @@ class PalmReadingProvider extends ChangeNotifier {
       log('Error detecting palm: $e');
       throw Exception('Failed to detect palm.');
     }
-  }
-
-  @override
-  void dispose() {
-    _imageLabeler.close();
-    super.dispose();
   }
 }
